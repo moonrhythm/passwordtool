@@ -10,9 +10,8 @@ import (
 
 // Errors
 var (
-	ErrInvalidComparer = errors.New("passwordtool: invalid comparer")
-	ErrInvalidHash     = errors.New("passwordtool: invalid hash password")
-	ErrMismatched      = errors.New("passwordtool: hashed and password mismatched")
+	ErrInvalidHash = errors.New("passwordtool: invalid hash password")
+	ErrMismatched  = errors.New("passwordtool: hashed and password mismatched")
 )
 
 var strategies = []HashComparer{
@@ -43,7 +42,7 @@ func Hash(password string) (string, error) {
 func Compare(hashedPassword string, password string) error {
 	hc := findHC(hashedPassword)
 	if hc == nil {
-		return ErrInvalidComparer
+		return ErrInvalidHash
 	}
 	return hc.Compare(hashedPassword, password)
 }

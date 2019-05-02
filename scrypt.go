@@ -129,7 +129,7 @@ func (hc Scrypt) Hash(password string) (string, error) {
 func (hc Scrypt) Compare(hashedPassword string, password string) error {
 	s, hashed := extract(hashedPassword)
 	if s != hc.String() {
-		return ErrInvalidComparer
+		return ErrInvalidHash
 	}
 	return hc.compare(hashed, password)
 }

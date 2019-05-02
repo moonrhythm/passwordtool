@@ -53,7 +53,7 @@ func (hc BcryptHash) Hash(password string) (string, error) {
 func (hc BcryptHash) Compare(hashedPassword string, password string) error {
 	s, hashed := extract(hashedPassword)
 	if s != hc.String() {
-		return ErrInvalidComparer
+		return ErrInvalidHash
 	}
 
 	hasher, k := hc.decode(hashed)

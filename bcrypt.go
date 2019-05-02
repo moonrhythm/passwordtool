@@ -33,6 +33,9 @@ func (hc Bcrypt) compare(hashedPassword string, password string) error {
 	if err == bcrypt.ErrMismatchedHashAndPassword {
 		return ErrMismatched
 	}
+	if err == bcrypt.ErrHashTooShort {
+		return ErrInvalidHash
+	}
 	return err
 }
 
@@ -49,7 +52,7 @@ func (hc Bcrypt) Hash(password string) (string, error) {
 func (hc Bcrypt) Compare(hashedPassword string, password string) error {
 	s, hashed := extract(hashedPassword)
 	if s != hc.String() {
-		return ErrInvalidComparer
+		return ErrInvalidHash
 	}
 	return hc.compare(hashed, password)
 }

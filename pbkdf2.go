@@ -115,7 +115,7 @@ func (hc PBKDF2) Hash(password string) (string, error) {
 func (hc PBKDF2) Compare(hashedPassword string, password string) error {
 	s, hashed := extract(hashedPassword)
 	if s != hc.String() {
-		return ErrInvalidComparer
+		return ErrInvalidHash
 	}
 	return hc.compare(hashed, password)
 }
