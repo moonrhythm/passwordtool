@@ -9,8 +9,8 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
-// Argon2 strategy
-type Argon2 struct {
+// Argon2id strategy
+type Argon2id struct {
 	S       int
 	Time    uint32
 	Memory  uint32
@@ -18,53 +18,53 @@ type Argon2 struct {
 	KeyLen  uint32
 }
 
-func (Argon2) String() string {
-	return "argon2"
+func (Argon2id) String() string {
+	return "argon2id"
 }
 
-func (hc Argon2) time() uint32 {
+func (hc Argon2id) time() uint32 {
 	if hc.Time <= 0 {
-		return 3
+		return 1
 	}
 	return hc.Time
 }
 
-func (hc Argon2) memory() uint32 {
+func (hc Argon2id) memory() uint32 {
 	if hc.Memory <= 0 {
-		return 32 * 1024
+		return 64 * 1024
 	}
 	return hc.Memory
 }
 
-func (hc Argon2) threads() uint8 {
+func (hc Argon2id) threads() uint8 {
 	if hc.Threads <= 0 {
 		return 4
 	}
 	return hc.Threads
 }
 
-func (hc Argon2) keyLen() uint32 {
+func (hc Argon2id) keyLen() uint32 {
 	if hc.KeyLen <= 0 {
 		return 32
 	}
 	return hc.KeyLen
 }
 
-func (hc Argon2) s() int {
+func (hc Argon2id) s() int {
 	if hc.S <= 0 {
 		return 16
 	}
 	return hc.S
 }
 
-func (hc Argon2) hash(password string) (string, error) {
+func (hc Argon2id) hash(password string) (string, error) {
 	salt, err := generateSalt(hc.s())
 	if err != nil {
 		return "", err
 	}
 
 	time, memory, keyLen := hc.time(), hc.memory(), hc.keyLen()
-	dk := argon2.Key([]byte(password), salt, time, memory, hc.threads(), keyLen)
+	dk := argon2.IDKey([]byte(password), salt, time, memory, hc.threads(), keyLen)
 	return fmt.Sprintf(
 		"%d$%d$%d$%s$%s",
 		time, memory, keyLen,
@@ -72,17 +72,17 @@ func (hc Argon2) hash(password string) (string, error) {
 	), nil
 }
 
-func (hc Argon2) compare(hashed, password string) (bool, error) {
+func (hc Argon2id) compare(hashed, password string) (bool, error) {
 	time, memory, keyLen, salt, dk := hc.decode(hashed)
 	if len(dk) == 0 {
 		return false, ErrInvalidHashed
 	}
 
-	pk := argon2.Key([]byte(password), salt, time, memory, hc.threads(), keyLen)
+	pk := argon2.IDKey([]byte(password), salt, time, memory, hc.threads(), keyLen)
 	return subtle.ConstantTimeCompare(dk, pk) == 1, nil
 }
 
-func (hc Argon2) decode(hashed string) (time, memory uint32, keyLen uint32, salt, dk []byte) {
+func (hc Argon2id) decode(hashed string) (time, memory uint32, keyLen uint32, salt, dk []byte) {
 	xs := strings.Split(hashed, "$")
 	if len(xs) != 5 {
 		return
@@ -112,7 +112,7 @@ func (hc Argon2) decode(hashed string) (time, memory uint32, keyLen uint32, salt
 }
 
 // Hash hashes password
-func (hc Argon2) Hash(password string) (string, error) {
+func (hc Argon2id) Hash(password string) (string, error) {
 	hashed, err := hc.hash(password)
 	if err != nil {
 		return "", err
@@ -121,7 +121,7 @@ func (hc Argon2) Hash(password string) (string, error) {
 }
 
 // Compare compares hashed with password
-func (hc Argon2) Compare(hashedPassword string, password string) (bool, error) {
+func (hc Argon2id) Compare(hashedPassword string, password string) (bool, error) {
 	s, hashed := extract(hashedPassword)
 	if s != hc.String() {
 		return false, ErrInvalidComparer

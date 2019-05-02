@@ -18,7 +18,7 @@ var strategies = []HashComparer{
 	BcryptHash{},
 	Scrypt{},
 	PBKDF2{},
-	Argon2{},
+	Argon2id{},
 }
 
 // HashComparer interface
@@ -29,7 +29,7 @@ type HashComparer interface {
 	Compare(hashedPassword string, password string) (bool, error)
 }
 
-var defaultStrategy = Argon2{}
+var defaultStrategy = Argon2id{}
 
 // Hash hashes password using default strategy
 func Hash(password string) (string, error) {
