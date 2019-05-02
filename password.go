@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// Errors
 var (
 	ErrInvalidComparer = errors.New("passwordtool: invalid comparer")
 	ErrInvalidHashed   = errors.New("passwordtool: invalid hashed")
