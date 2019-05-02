@@ -18,9 +18,17 @@ func TestStrategies(t *testing.T) {
 			assert.NoError(t, err)
 			assert.NotEmpty(t, hashed)
 
-			assert.False(t, s.Compare(hashed, ""))
-			assert.False(t, s.Compare(hashed, "invalid"))
-			assert.True(t, s.Compare(hashed, "superman"))
+			equal, err := s.Compare(hashed, "")
+			assert.NoError(t, err)
+			assert.False(t, equal)
+
+			equal, err = s.Compare(hashed, "invalid")
+			assert.NoError(t, err)
+			assert.False(t, equal)
+
+			equal, err = s.Compare(hashed, "superman")
+			assert.NoError(t, err)
+			assert.True(t, equal)
 
 			hashed2, err := s.Hash("superman")
 			assert.NoError(t, err)
@@ -37,9 +45,17 @@ func TestHashCompare(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotEmpty(t, hashed)
 
-	assert.False(t, Compare(hashed, ""))
-	assert.False(t, Compare(hashed, "invalid"))
-	assert.True(t, Compare(hashed, "superman"))
+	equal, err := Compare(hashed, "")
+	assert.NoError(t, err)
+	assert.False(t, equal)
+
+	equal, err = Compare(hashed, "invalid")
+	assert.NoError(t, err)
+	assert.False(t, equal)
+
+	equal, err = Compare(hashed, "superman")
+	assert.NoError(t, err)
+	assert.True(t, equal)
 }
 
 func TestCompare(t *testing.T) {
@@ -54,9 +70,17 @@ func TestCompare(t *testing.T) {
 			assert.NoError(t, err)
 			assert.NotEmpty(t, hashed)
 
-			assert.False(t, Compare(hashed, ""))
-			assert.False(t, Compare(hashed, "invalid"))
-			assert.True(t, Compare(hashed, "superman"))
+			equal, err := Compare(hashed, "")
+			assert.NoError(t, err)
+			assert.False(t, equal)
+
+			equal, err = Compare(hashed, "invalid")
+			assert.NoError(t, err)
+			assert.False(t, equal)
+
+			equal, err = Compare(hashed, "superman")
+			assert.NoError(t, err)
+			assert.True(t, equal)
 		})
 	}
 }

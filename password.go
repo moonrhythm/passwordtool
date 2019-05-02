@@ -3,8 +3,14 @@ package passwordtool
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"strings"
+)
+
+var (
+	ErrInvalidComparer = errors.New("passwordtool: invalid comparer")
+	ErrInvalidHashed   = errors.New("password: invalid hashed")
 )
 
 var strategies = []HashComparer{
@@ -20,7 +26,7 @@ type HashComparer interface {
 	fmt.Stringer
 
 	Hash(password string) (string, error)
-	Compare(hashedPassword string, password string) bool
+	Compare(hashedPassword string, password string) (bool, error)
 }
 
 var defaultStrategy = Argon2{}
@@ -31,10 +37,10 @@ func Hash(password string) (string, error) {
 }
 
 // Compare compares hashed and password
-func Compare(hashedPassword string, password string) bool {
+func Compare(hashedPassword string, password string) (bool, error) {
 	hc := findHC(hashedPassword)
 	if hc == nil {
-		return false
+		return false, fmt.Errorf("passwordtool: comparer not implement")
 	}
 	return hc.Compare(hashedPassword, password)
 }

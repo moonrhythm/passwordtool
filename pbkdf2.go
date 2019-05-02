@@ -61,14 +61,17 @@ func (hc PBKDF2) hash(password string) (string, error) {
 	), nil
 }
 
-func (hc PBKDF2) compare(hashed, password string) bool {
+func (hc PBKDF2) compare(hashed, password string) (bool, error) {
 	h, iter, keyLen, salt, dk := hc.decode(hashed)
-	if h == nil || len(dk) == 0 {
-		return false
+	if h == nil {
+		return false, fmt.Errorf("unknown hasher")
+	}
+	if len(dk) == 0 {
+		return false, ErrInvalidHashed
 	}
 
 	pk := pbkdf2.Key([]byte(password), salt, iter, keyLen, h.New)
-	return subtle.ConstantTimeCompare(dk, pk) == 1
+	return subtle.ConstantTimeCompare(dk, pk) == 1, nil
 }
 
 func (hc PBKDF2) decode(hashed string) (h Hasher, iter, keyLen int, salt, dk []byte) {
@@ -106,10 +109,10 @@ func (hc PBKDF2) Hash(password string) (string, error) {
 }
 
 // Compare compares hashed with password
-func (hc PBKDF2) Compare(hashedPassword string, password string) bool {
+func (hc PBKDF2) Compare(hashedPassword string, password string) (bool, error) {
 	s, hashed := extract(hashedPassword)
 	if s != hc.String() {
-		return false
+		return false, ErrInvalidComparer
 	}
 	return hc.compare(hashed, password)
 }

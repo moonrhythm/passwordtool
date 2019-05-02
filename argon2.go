@@ -72,14 +72,14 @@ func (hc Argon2) hash(password string) (string, error) {
 	), nil
 }
 
-func (hc Argon2) compare(hashed, password string) bool {
+func (hc Argon2) compare(hashed, password string) (bool, error) {
 	time, memory, keyLen, salt, dk := hc.decode(hashed)
 	if len(dk) == 0 {
-		return false
+		return false, ErrInvalidHashed
 	}
 
 	pk := argon2.Key([]byte(password), salt, time, memory, hc.threads(), keyLen)
-	return subtle.ConstantTimeCompare(dk, pk) == 1
+	return subtle.ConstantTimeCompare(dk, pk) == 1, nil
 }
 
 func (hc Argon2) decode(hashed string) (time, memory uint32, keyLen uint32, salt, dk []byte) {
@@ -121,10 +121,10 @@ func (hc Argon2) Hash(password string) (string, error) {
 }
 
 // Compare compares hashed with password
-func (hc Argon2) Compare(hashedPassword string, password string) bool {
+func (hc Argon2) Compare(hashedPassword string, password string) (bool, error) {
 	s, hashed := extract(hashedPassword)
 	if s != hc.String() {
-		return false
+		return false, ErrInvalidComparer
 	}
 	return hc.compare(hashed, password)
 }

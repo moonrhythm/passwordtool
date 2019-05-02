@@ -75,18 +75,18 @@ func (hc Scrypt) hash(password string) (string, error) {
 	), nil
 }
 
-func (hc Scrypt) compare(hashed, password string) bool {
+func (hc Scrypt) compare(hashed, password string) (bool, error) {
 	n, r, p, salt, dk := hc.decode(hashed)
 	if len(dk) == 0 {
-		return false
+		return false, ErrInvalidHashed
 	}
 
 	pk, err := scrypt.Key([]byte(password), salt, n, r, p, len(dk))
 	if err != nil {
-		return false
+		return false, err
 	}
 
-	return subtle.ConstantTimeCompare(dk, pk) == 1
+	return subtle.ConstantTimeCompare(dk, pk) == 1, nil
 }
 
 func (hc Scrypt) decode(hashed string) (n, r, p int, salt, dk []byte) {
@@ -123,10 +123,10 @@ func (hc Scrypt) Hash(password string) (string, error) {
 }
 
 // Compare compares hashed with password
-func (hc Scrypt) Compare(hashedPassword string, password string) bool {
+func (hc Scrypt) Compare(hashedPassword string, password string) (bool, error) {
 	s, hashed := extract(hashedPassword)
 	if s != hc.String() {
-		return false
+		return false, ErrInvalidComparer
 	}
 	return hc.compare(hashed, password)
 }

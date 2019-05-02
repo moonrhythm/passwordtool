@@ -31,10 +31,10 @@ func (hc BcryptHash) Hash(password string) (string, error) {
 }
 
 // Compare compares hashed with password
-func (hc BcryptHash) Compare(hashedPassword string, password string) bool {
+func (hc BcryptHash) Compare(hashedPassword string, password string) (bool, error) {
 	s, hashed := extract(hashedPassword)
 	if s != hc.String() {
-		return false
+		return false, ErrInvalidComparer
 	}
 
 	h := hc.h().New()

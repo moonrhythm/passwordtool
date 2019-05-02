@@ -25,9 +25,15 @@ func (hc Bcrypt) hash(password string) (string, error) {
 	return string(hashed), err
 }
 
-func (hc Bcrypt) compare(hashedPassword string, password string) bool {
+func (hc Bcrypt) compare(hashedPassword string, password string) (bool, error) {
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
-	return err == nil
+	if err == bcrypt.ErrMismatchedHashAndPassword {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 // Hash hashes password
@@ -40,10 +46,10 @@ func (hc Bcrypt) Hash(password string) (string, error) {
 }
 
 // Compare compares hashed with password
-func (hc Bcrypt) Compare(hashedPassword string, password string) bool {
+func (hc Bcrypt) Compare(hashedPassword string, password string) (bool, error) {
 	s, hashed := extract(hashedPassword)
 	if s != hc.String() {
-		return false
+		return false, ErrInvalidComparer
 	}
 	return hc.compare(hashed, password)
 }
