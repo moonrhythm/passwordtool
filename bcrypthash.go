@@ -18,6 +18,7 @@ func (hc BcryptHash) String() string {
 	return "bcrypt-" + hc.h().String()
 }
 
+// Hash hashes password
 func (hc BcryptHash) Hash(password string) (string, error) {
 	h := hc.h().New()
 	h.Write([]byte(password))
@@ -29,6 +30,7 @@ func (hc BcryptHash) Hash(password string) (string, error) {
 	return hc.String() + "$" + string(hashed), nil
 }
 
+// Compare compares hashed with password
 func (hc BcryptHash) Compare(hashedPassword string, password string) bool {
 	s, hashed := extract(hashedPassword)
 	if s != hc.String() {

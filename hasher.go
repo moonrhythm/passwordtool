@@ -22,6 +22,7 @@ func findHasher(name string) Hasher {
 	return nil
 }
 
+// Hasher strategies
 var (
 	SHA256 Hasher = _sha256{}
 )

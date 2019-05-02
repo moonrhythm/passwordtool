@@ -111,6 +111,7 @@ func (hc Argon2) decode(hashed string) (time, memory uint32, keyLen uint32, salt
 	return
 }
 
+// Hash hashes password
 func (hc Argon2) Hash(password string) (string, error) {
 	hashed, err := hc.hash(password)
 	if err != nil {
@@ -119,6 +120,7 @@ func (hc Argon2) Hash(password string) (string, error) {
 	return hc.String() + "$" + string(hashed), nil
 }
 
+// Compare compares hashed with password
 func (hc Argon2) Compare(hashedPassword string, password string) bool {
 	s, hashed := extract(hashedPassword)
 	if s != hc.String() {

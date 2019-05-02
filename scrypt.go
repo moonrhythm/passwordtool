@@ -113,6 +113,7 @@ func (hc Scrypt) decode(hashed string) (n, r, p int, salt, dk []byte) {
 	return
 }
 
+// Hash hashes password
 func (hc Scrypt) Hash(password string) (string, error) {
 	hashed, err := hc.hash(password)
 	if err != nil {
@@ -121,6 +122,7 @@ func (hc Scrypt) Hash(password string) (string, error) {
 	return hc.String() + "$" + string(hashed), nil
 }
 
+// Compare compares hashed with password
 func (hc Scrypt) Compare(hashedPassword string, password string) bool {
 	s, hashed := extract(hashedPassword)
 	if s != hc.String() {

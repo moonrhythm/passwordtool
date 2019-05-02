@@ -30,6 +30,7 @@ func (hc Bcrypt) compare(hashedPassword string, password string) bool {
 	return err == nil
 }
 
+// Hash hashes password
 func (hc Bcrypt) Hash(password string) (string, error) {
 	hashed, err := hc.hash(password)
 	if err != nil {
@@ -38,6 +39,7 @@ func (hc Bcrypt) Hash(password string) (string, error) {
 	return hc.String() + "$" + string(hashed), nil
 }
 
+// Compare compares hashed with password
 func (hc Bcrypt) Compare(hashedPassword string, password string) bool {
 	s, hashed := extract(hashedPassword)
 	if s != hc.String() {

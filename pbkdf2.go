@@ -96,6 +96,7 @@ func (hc PBKDF2) decode(hashed string) (h Hasher, iter, keyLen int, salt, dk []b
 	return
 }
 
+// Hash hashes password
 func (hc PBKDF2) Hash(password string) (string, error) {
 	hashed, err := hc.hash(password)
 	if err != nil {
@@ -104,6 +105,7 @@ func (hc PBKDF2) Hash(password string) (string, error) {
 	return hc.String() + "$" + string(hashed), nil
 }
 
+// Compare compares hashed with password
 func (hc PBKDF2) Compare(hashedPassword string, password string) bool {
 	s, hashed := extract(hashedPassword)
 	if s != hc.String() {
