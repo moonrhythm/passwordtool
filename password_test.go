@@ -19,17 +19,14 @@ func TestStrategies(t *testing.T) {
 			assert.NotEmpty(t, hashed)
 			t.Logf("hashed: %s", hashed)
 
-			equal, err := s.Compare(hashed, "")
-			assert.NoError(t, err)
-			assert.False(t, equal)
+			err = s.Compare(hashed, "")
+			assert.Equal(t, ErrMismatched, err)
 
-			equal, err = s.Compare(hashed, "invalid")
-			assert.NoError(t, err)
-			assert.False(t, equal)
+			err = s.Compare(hashed, "invalid")
+			assert.Equal(t, ErrMismatched, err)
 
-			equal, err = s.Compare(hashed, "superman")
+			err = s.Compare(hashed, "superman")
 			assert.NoError(t, err)
-			assert.True(t, equal)
 
 			hashed2, err := s.Hash("superman")
 			assert.NoError(t, err)
@@ -46,17 +43,14 @@ func TestHashCompare(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotEmpty(t, hashed)
 
-	equal, err := Compare(hashed, "")
-	assert.NoError(t, err)
-	assert.False(t, equal)
+	err = Compare(hashed, "")
+	assert.Equal(t, ErrMismatched, err)
 
-	equal, err = Compare(hashed, "invalid")
-	assert.NoError(t, err)
-	assert.False(t, equal)
+	err = Compare(hashed, "invalid")
+	assert.Equal(t, ErrMismatched, err)
 
-	equal, err = Compare(hashed, "superman")
+	err = Compare(hashed, "superman")
 	assert.NoError(t, err)
-	assert.True(t, equal)
 }
 
 func TestCompare(t *testing.T) {
@@ -71,17 +65,14 @@ func TestCompare(t *testing.T) {
 			assert.NoError(t, err)
 			assert.NotEmpty(t, hashed)
 
-			equal, err := Compare(hashed, "")
-			assert.NoError(t, err)
-			assert.False(t, equal)
+			err = Compare(hashed, "")
+			assert.Equal(t, ErrMismatched, err)
 
-			equal, err = Compare(hashed, "invalid")
-			assert.NoError(t, err)
-			assert.False(t, equal)
+			err = Compare(hashed, "invalid")
+			assert.Equal(t, ErrMismatched, err)
 
-			equal, err = Compare(hashed, "superman")
+			err = Compare(hashed, "superman")
 			assert.NoError(t, err)
-			assert.True(t, equal)
 		})
 	}
 }

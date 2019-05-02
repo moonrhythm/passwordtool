@@ -20,11 +20,13 @@ if err != nil {
 }
 fmt.Println(hashed)
 
-equal, err := passwordtool.Compare(hashed, "superman")
+err = passwordtool.Compare(hashed, "superman")
+if err == passwordtool.ErrMismatched {
+	// not equal
+}
 if err != nil {
 	// ...
 }
-fmt.Println(equal)
 ```
 
 ## Specific algorithm
@@ -36,17 +38,21 @@ if err != nil {
 	// ...
 }
 
-equal, err := hc.Compare(hashed, "superman")
+err = hc.Compare(hashed, "superman")
+if err == passwordtool.ErrMismatched {
+	// not equal
+}
 if err != nil {
 	// ...
 }
-fmt.Println(equal)
 
 // or
 
-equal, err = passwordtool.Compare(hashed, "superman")
+err = passwordtool.Compare(hashed, "superman")
+if err == passwordtool.ErrMismatched {
+	// not equal
+}
 if err != nil {
 	// ...
 }
-fmt.Println(equal)
 ```

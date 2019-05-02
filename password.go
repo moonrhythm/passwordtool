@@ -11,7 +11,8 @@ import (
 // Errors
 var (
 	ErrInvalidComparer = errors.New("passwordtool: invalid comparer")
-	ErrInvalidHashed   = errors.New("passwordtool: invalid hashed")
+	ErrInvalidHash     = errors.New("passwordtool: invalid hash password")
+	ErrMismatched      = errors.New("passwordtool: hashed and password mismatched")
 )
 
 var strategies = []HashComparer{
@@ -27,7 +28,7 @@ type HashComparer interface {
 	fmt.Stringer
 
 	Hash(password string) (string, error)
-	Compare(hashedPassword string, password string) (bool, error)
+	Compare(hashedPassword string, password string) error
 }
 
 var defaultStrategy = Argon2id{}
@@ -38,10 +39,11 @@ func Hash(password string) (string, error) {
 }
 
 // Compare compares hashed and password
-func Compare(hashedPassword string, password string) (bool, error) {
+// returns nil if hashed and password equal
+func Compare(hashedPassword string, password string) error {
 	hc := findHC(hashedPassword)
 	if hc == nil {
-		return false, fmt.Errorf("passwordtool: comparer not implement")
+		return ErrInvalidComparer
 	}
 	return hc.Compare(hashedPassword, password)
 }
