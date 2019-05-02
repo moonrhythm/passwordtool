@@ -1,5 +1,9 @@
 package passwordtool
 
+import (
+	"strings"
+)
+
 // BcryptHash strategy
 type BcryptHash struct {
 	Bcrypt
@@ -15,7 +19,22 @@ func (hc BcryptHash) h() Hasher {
 }
 
 func (hc BcryptHash) String() string {
-	return "bcrypt-" + hc.h().String()
+	return "bcrypt-hash"
+}
+
+func (hc BcryptHash) decode(hashed string) (h Hasher, k string) {
+	xs := strings.SplitN(hashed, "$", 2)
+	if len(xs) != 2 {
+		return
+	}
+
+	h = findHasher(xs[0])
+	if h == nil {
+		return
+	}
+
+	k = xs[1]
+	return
 }
 
 // Hash hashes password
@@ -27,7 +46,7 @@ func (hc BcryptHash) Hash(password string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return hc.String() + "$" + string(hashed), nil
+	return hc.String() + "$" + hc.h().String() + "$" + string(hashed), nil
 }
 
 // Compare compares hashed with password
@@ -37,8 +56,13 @@ func (hc BcryptHash) Compare(hashedPassword string, password string) error {
 		return ErrInvalidComparer
 	}
 
-	h := hc.h().New()
+	hasher, k := hc.decode(hashed)
+	if hasher == nil || k == "" {
+		return ErrInvalidHash
+	}
+
+	h := hasher.New()
 	h.Write([]byte(password))
 	p := h.Sum(nil)
-	return hc.compare(hashed, string(p[:]))
+	return hc.compare(k, string(p[:]))
 }
