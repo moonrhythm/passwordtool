@@ -133,7 +133,7 @@ func (hc Argon2id) Hash(password string) (string, error) {
 func (hc Argon2id) Compare(hashedPassword string, password string) error {
 	s, hashed := extract(hashedPassword)
 	if s != hc.String() {
-		return ErrInvalidComparer
+		return ErrInvalidHash
 	}
 	return hc.compare(hashed, password)
 }
