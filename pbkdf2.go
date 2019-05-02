@@ -23,7 +23,7 @@ func (PBKDF2) String() string {
 
 func (hc PBKDF2) iter() int {
 	if hc.Iter <= 0 {
-		return 4096
+		return 10000
 	}
 	return hc.Iter
 }
@@ -37,13 +37,13 @@ func (hc PBKDF2) keyLen() int {
 
 func (hc PBKDF2) s() int {
 	if hc.S <= 0 {
-		return 16
+		return 8
 	}
 	return hc.S
 }
 
 func (hc PBKDF2) h() Hasher {
-	return SHA256
+	return SHA512
 }
 
 func (hc PBKDF2) hash(password string) (string, error) {

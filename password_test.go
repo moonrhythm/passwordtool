@@ -17,6 +17,7 @@ func TestStrategies(t *testing.T) {
 			hashed, err := s.Hash("superman")
 			assert.NoError(t, err)
 			assert.NotEmpty(t, hashed)
+			t.Logf("hashed: %s", hashed)
 
 			equal, err := s.Compare(hashed, "")
 			assert.NoError(t, err)

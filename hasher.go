@@ -2,6 +2,7 @@ package passwordtool
 
 import (
 	"crypto/sha256"
+	"crypto/sha512"
 	"fmt"
 	"hash"
 )
@@ -25,10 +26,12 @@ func findHasher(name string) Hasher {
 // Hasher strategies
 var (
 	SHA256 Hasher = _sha256{}
+	SHA512 Hasher = _sha512{}
 )
 
 var hashers = []Hasher{
 	SHA256,
+	SHA512,
 }
 
 type _sha256 struct{}
@@ -39,4 +42,14 @@ func (_sha256) String() string {
 
 func (_sha256) New() hash.Hash {
 	return sha256.New()
+}
+
+type _sha512 struct{}
+
+func (_sha512) String() string {
+	return "sha512"
+}
+
+func (_sha512) New() hash.Hash {
+	return sha512.New()
 }
