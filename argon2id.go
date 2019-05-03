@@ -9,6 +9,14 @@ import (
 	"golang.org/x/crypto/argon2"
 )
 
+const (
+	argon2idDefaultS       = 16
+	argon2idDefaultTime    = 2
+	argon2idDefaultMemory  = 64 * 1024
+	argon2idDefaultThreads = 4
+	argon2idDefaultKeyLen  = 16
+)
+
 // Argon2id strategy
 type Argon2id struct {
 	S       int
@@ -24,35 +32,35 @@ func (Argon2id) String() string {
 
 func (hc Argon2id) time() uint32 {
 	if hc.Time <= 0 {
-		return 2
+		return argon2idDefaultTime
 	}
 	return hc.Time
 }
 
 func (hc Argon2id) memory() uint32 {
 	if hc.Memory <= 0 {
-		return 64 * 1024
+		return argon2idDefaultMemory
 	}
 	return hc.Memory
 }
 
 func (hc Argon2id) threads() uint8 {
 	if hc.Threads <= 0 {
-		return 4
+		return argon2idDefaultThreads
 	}
 	return hc.Threads
 }
 
 func (hc Argon2id) keyLen() uint32 {
 	if hc.KeyLen <= 0 {
-		return 16
+		return argon2idDefaultKeyLen
 	}
 	return hc.KeyLen
 }
 
 func (hc Argon2id) s() int {
 	if hc.S <= 0 {
-		return 16
+		return argon2idDefaultS
 	}
 	return hc.S
 }

@@ -9,6 +9,14 @@ import (
 	"golang.org/x/crypto/pbkdf2"
 )
 
+const (
+	pbkdf2DefaultIter   = 10000
+	pbkdf2DefaultKeyLen = 32
+	pbkdf2DefaultS      = 8
+)
+
+var pbkdf2DefaultH = SHA512
+
 // PBKDF2 strategy
 type PBKDF2 struct {
 	Iter   int
@@ -23,27 +31,30 @@ func (PBKDF2) String() string {
 
 func (hc PBKDF2) iter() int {
 	if hc.Iter <= 0 {
-		return 10000
+		return pbkdf2DefaultIter
 	}
 	return hc.Iter
 }
 
 func (hc PBKDF2) keyLen() int {
 	if hc.KeyLen <= 0 {
-		return 32
+		return pbkdf2DefaultKeyLen
 	}
 	return hc.KeyLen
 }
 
 func (hc PBKDF2) s() int {
 	if hc.S <= 0 {
-		return 8
+		return pbkdf2DefaultS
 	}
 	return hc.S
 }
 
 func (hc PBKDF2) h() Hasher {
-	return SHA512
+	if hc.H == nil {
+		return pbkdf2DefaultH
+	}
+	return hc.H
 }
 
 func (hc PBKDF2) hash(password string) (string, error) {

@@ -15,11 +15,11 @@ var (
 )
 
 var strategies = []HashComparer{
-	Bcrypt{},
-	BcryptHash{},
-	Scrypt{},
-	PBKDF2{},
 	Argon2id{},
+	PBKDF2{},
+	Scrypt{},
+	BcryptHash{},
+	Bcrypt{},
 }
 
 // HashComparer interface

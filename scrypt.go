@@ -9,6 +9,14 @@ import (
 	"golang.org/x/crypto/scrypt"
 )
 
+const (
+	scryptDefaultN = 32768
+	scryptDefaultR = 8
+	scryptDefaultP = 1
+	scryptDefaultS = 16
+	scryptDefaultK = 32
+)
+
 // Scrypt strategy
 type Scrypt struct {
 	N int
@@ -24,35 +32,35 @@ func (Scrypt) String() string {
 
 func (hc Scrypt) n() int {
 	if hc.N <= 0 {
-		return 32768
+		return scryptDefaultN
 	}
 	return hc.N
 }
 
 func (hc Scrypt) r() int {
 	if hc.R <= 0 {
-		return 8
+		return scryptDefaultR
 	}
 	return hc.R
 }
 
 func (hc Scrypt) p() int {
 	if hc.P <= 0 {
-		return 1
+		return scryptDefaultP
 	}
 	return hc.P
 }
 
 func (hc Scrypt) s() int {
 	if hc.S <= 0 {
-		return 16
+		return scryptDefaultS
 	}
 	return hc.S
 }
 
 func (hc Scrypt) k() int {
 	if hc.K <= 0 {
-		return 32
+		return scryptDefaultK
 	}
 	return hc.K
 }
