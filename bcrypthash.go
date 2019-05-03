@@ -4,6 +4,8 @@ import (
 	"strings"
 )
 
+var bcryptHashDefaultH = SHA256
+
 // BcryptHash strategy
 type BcryptHash struct {
 	Bcrypt
@@ -13,7 +15,7 @@ type BcryptHash struct {
 
 func (hc BcryptHash) h() Hasher {
 	if hc.H == nil {
-		return SHA256
+		return bcryptHashDefaultH
 	}
 	return hc.H
 }

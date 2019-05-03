@@ -4,6 +4,9 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// TODO: cost setup function, run when user call
+var bcryptDefaultCost = bcrypt.DefaultCost
+
 // Bcrypt strategy
 type Bcrypt struct {
 	Cost int
@@ -15,7 +18,7 @@ func (Bcrypt) String() string {
 
 func (hc Bcrypt) cost() int {
 	if hc.Cost <= 0 {
-		return 10
+		return bcryptDefaultCost
 	}
 	return hc.Cost
 }
