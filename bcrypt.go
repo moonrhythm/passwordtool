@@ -26,12 +26,27 @@ func (hc Bcrypt) cost() int {
 }
 
 func (hc Bcrypt) hash(password string) (string, error) {
-	hashed, err := bcrypt.GenerateFromPassword([]byte(password), hc.cost())
+	cost := hc.cost()
+	if cost > bcryptMaxCost {
+		return "", ErrInvalidHash
+	}
+	hashed, err := bcrypt.GenerateFromPassword([]byte(password), cost)
 	return string(hashed), err
 }
 
 func (hc Bcrypt) compare(hashedPassword string, password string) error {
-	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+	cost, err := bcrypt.Cost([]byte(hashedPassword))
+	if err != nil {
+		if errors.Is(err, bcrypt.ErrHashTooShort) {
+			return ErrInvalidHash
+		}
+		return err
+	}
+	if cost > bcryptMaxCost {
+		return ErrInvalidHash
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 	if err == nil {
 		return nil
 	}

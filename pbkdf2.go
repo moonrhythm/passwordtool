@@ -56,12 +56,19 @@ func (hc PBKDF2) h() Hasher {
 }
 
 func (hc PBKDF2) hash(password string) (string, error) {
+	h, iter, keyLen := hc.h(), hc.iter(), hc.keyLen()
+	if err := checkPBKDF2(iter, keyLen); err != nil {
+		return "", err
+	}
+	if err := checkSaltLen(hc.s()); err != nil {
+		return "", err
+	}
+
 	salt, err := generateSalt(hc.s())
 	if err != nil {
 		return "", err
 	}
 
-	h, iter, keyLen := hc.h(), hc.iter(), hc.keyLen()
 	dk := pbkdf2.Key([]byte(password), salt, iter, keyLen, h.New)
 	return fmt.Sprintf(
 		"%s$%d$%d$%s$%s",
@@ -71,12 +78,9 @@ func (hc PBKDF2) hash(password string) (string, error) {
 }
 
 func (hc PBKDF2) compare(hashed, password string) error {
-	h, iter, keyLen, salt, dk := hc.decode(hashed)
-	if h == nil {
-		return ErrInvalidHash
-	}
-	if len(dk) == 0 {
-		return ErrInvalidHash
+	h, iter, keyLen, salt, dk, err := hc.decode(hashed)
+	if err != nil {
+		return err
 	}
 
 	pk := pbkdf2.Key([]byte(password), salt, iter, keyLen, h.New)
@@ -86,28 +90,37 @@ func (hc PBKDF2) compare(hashed, password string) error {
 	return ErrMismatched
 }
 
-func (hc PBKDF2) decode(hashed string) (h Hasher, iter, keyLen int, salt, dk []byte) {
+func (hc PBKDF2) decode(hashed string) (h Hasher, iter, keyLen int, salt, dk []byte, err error) {
 	xs := strings.Split(hashed, "$")
 	if len(xs) != 5 {
+		err = ErrInvalidHash
 		return
 	}
 
 	h = findHasher(xs[0])
 	if h == nil {
+		err = ErrInvalidHash
 		return
 	}
 
-	var err error
 	iter, err = strconv.Atoi(xs[1])
 	if err != nil {
+		err = ErrInvalidHash
 		return
 	}
 	keyLen, err = strconv.Atoi(xs[2])
 	if err != nil {
+		err = ErrInvalidHash
 		return
 	}
-	salt = decodeBase64(xs[3])
-	dk = decodeBase64(xs[4])
+	if err = checkPBKDF2(iter, keyLen); err != nil {
+		return
+	}
+	salt, err = decodeBase64(xs[3], minSaltLen, maxSaltLen)
+	if err != nil {
+		return
+	}
+	dk, err = decodeBase64(xs[4], keyLen, keyLen)
 	return
 }
 

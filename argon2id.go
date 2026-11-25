@@ -66,12 +66,19 @@ func (hc Argon2id) s() int {
 }
 
 func (hc Argon2id) hash(password string) (string, error) {
+	time, memory, threads, keyLen := hc.time(), hc.memory(), hc.threads(), hc.keyLen()
+	if err := checkArgon2id(time, memory, threads, keyLen); err != nil {
+		return "", err
+	}
+	if err := checkSaltLen(hc.s()); err != nil {
+		return "", err
+	}
+
 	salt, err := generateSalt(hc.s())
 	if err != nil {
 		return "", err
 	}
 
-	time, memory, threads, keyLen := hc.time(), hc.memory(), hc.threads(), hc.keyLen()
 	dk := argon2.IDKey([]byte(password), salt, time, memory, threads, keyLen)
 	return fmt.Sprintf(
 		"%d$%d$%d$%d$%s$%s",
@@ -81,9 +88,9 @@ func (hc Argon2id) hash(password string) (string, error) {
 }
 
 func (hc Argon2id) compare(hashed, password string) error {
-	time, memory, threads, keyLen, salt, dk := hc.decode(hashed)
-	if len(dk) == 0 {
-		return ErrInvalidHash
+	time, memory, threads, keyLen, salt, dk, err := hc.decode(hashed)
+	if err != nil {
+		return err
 	}
 
 	pk := argon2.IDKey([]byte(password), salt, time, memory, threads, keyLen)
@@ -93,38 +100,49 @@ func (hc Argon2id) compare(hashed, password string) error {
 	return ErrMismatched
 }
 
-func (hc Argon2id) decode(hashed string) (time, memory uint32, threads uint8, keyLen uint32, salt, dk []byte) {
+func (hc Argon2id) decode(hashed string) (time, memory uint32, threads uint8, keyLen uint32, salt, dk []byte, err error) {
 	xs := strings.Split(hashed, "$")
 	if len(xs) != 6 {
+		err = ErrInvalidHash
 		return
 	}
 
 	rawTime, err := strconv.ParseUint(xs[0], 10, 32)
 	if err != nil {
+		err = ErrInvalidHash
 		return
 	}
 	time = uint32(rawTime)
 
 	rawMemory, err := strconv.ParseUint(xs[1], 10, 32)
 	if err != nil {
+		err = ErrInvalidHash
 		return
 	}
 	memory = uint32(rawMemory)
 
 	rawThreads, err := strconv.ParseUint(xs[2], 10, 8)
 	if err != nil {
+		err = ErrInvalidHash
 		return
 	}
 	threads = uint8(rawThreads)
 
 	rawKeyLen, err := strconv.ParseUint(xs[3], 10, 32)
 	if err != nil {
+		err = ErrInvalidHash
 		return
 	}
 	keyLen = uint32(rawKeyLen)
 
-	salt = decodeBase64(xs[4])
-	dk = decodeBase64(xs[5])
+	if err = checkArgon2id(time, memory, threads, keyLen); err != nil {
+		return
+	}
+	salt, err = decodeBase64(xs[4], minSaltLen, maxSaltLen)
+	if err != nil {
+		return
+	}
+	dk, err = decodeBase64(xs[5], int(keyLen), int(keyLen))
 	return
 }
 
