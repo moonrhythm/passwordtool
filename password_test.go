@@ -17,7 +17,7 @@ var strategyToTest = []HashComparer{
 	PBKDF2{Iter: 4096, KeyLen: 16, H: SHA512, S: 32},
 	PBKDF2{},
 	Scrypt{},
-	Scrypt{N: 16384, R: 8, P: 1, S: 8, K: 16},
+	Scrypt{N: 16384, R: 8, P: 1, S: 16, K: 16},
 	BcryptHash{H: SHA512},
 	BcryptHash{H: SHA256},
 	BcryptHash{H: SHA1},

@@ -19,6 +19,11 @@ const (
 	minSaltLen = 8
 	maxSaltLen = 64
 	maxKeyLen  = 128
+
+	// New hashes use a 16-byte salt and tag. Compare still accepts the
+	// 8-byte salt stored by older PBKDF2 defaults.
+	hashMinSaltLen = 16
+	hashMinKeyLen  = 16
 )
 
 func checkArgon2id(time, memory uint32, threads uint8, keyLen uint32) error {
@@ -60,6 +65,13 @@ func checkKeyLen(n int) error {
 
 func checkSaltLen(n int) error {
 	if n < minSaltLen || n > maxSaltLen {
+		return ErrInvalidHash
+	}
+	return nil
+}
+
+func checkHashSizes(saltLen, keyLen int) error {
+	if saltLen < hashMinSaltLen || keyLen < hashMinKeyLen {
 		return ErrInvalidHash
 	}
 	return nil
