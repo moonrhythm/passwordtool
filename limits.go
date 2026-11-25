@@ -1,8 +1,8 @@
 package passwordtool
 
-// Bounds applied before a KDF runs. Compare rejects a stored hash outside
-// these limits. Hash uses the same limits, so a hash this package creates
-// can be verified.
+// Ceilings applied before a KDF runs. Compare rejects a stored hash outside
+// these limits. Hash enforces the same ceilings, plus hashMinSaltLen and
+// hashMinKeyLen, so every hash this package creates can still be verified.
 const (
 	argon2idMaxTime   = 16
 	argon2idMaxMemory = 256 << 10 // KiB; 256 MiB
