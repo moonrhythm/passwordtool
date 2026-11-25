@@ -11,9 +11,11 @@ import (
 )
 
 const (
-	pbkdf2DefaultIter   = 10000
+	pbkdf2DefaultIter   = 220_000
+	pbkdf2SHA256Iter    = 600_000
+	pbkdf2SHA1Iter      = 1_400_000
 	pbkdf2DefaultKeyLen = 32
-	pbkdf2DefaultS      = 8
+	pbkdf2DefaultS      = 16
 )
 
 var pbkdf2DefaultH = SHA512
@@ -31,10 +33,18 @@ func (PBKDF2) String() string {
 }
 
 func (hc PBKDF2) iter() int {
-	if hc.Iter <= 0 {
+	if hc.Iter > 0 {
+		return hc.Iter
+	}
+	// Zero Iter follows the OWASP floor for the selected HMAC.
+	switch hc.h() {
+	case SHA256:
+		return pbkdf2SHA256Iter
+	case SHA1:
+		return pbkdf2SHA1Iter
+	default:
 		return pbkdf2DefaultIter
 	}
-	return hc.Iter
 }
 
 func (hc PBKDF2) keyLen() int {
@@ -61,6 +71,9 @@ func (hc PBKDF2) hash(password string) (string, error) {
 		return "", err
 	}
 	if err := checkSaltLen(hc.s()); err != nil {
+		return "", err
+	}
+	if err := checkHashSizes(hc.s(), keyLen); err != nil {
 		return "", err
 	}
 

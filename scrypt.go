@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	scryptDefaultN = 32768
+	scryptDefaultN = 1 << 17
 	scryptDefaultR = 8
 	scryptDefaultP = 1
 	scryptDefaultS = 16
@@ -74,6 +74,9 @@ func (hc Scrypt) hash(password string) (string, error) {
 		return "", err
 	}
 	if err := checkSaltLen(hc.s()); err != nil {
+		return "", err
+	}
+	if err := checkHashSizes(hc.s(), keyLen); err != nil {
 		return "", err
 	}
 
