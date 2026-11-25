@@ -1,8 +1,8 @@
 package passwordtool
 
-// Bounds applied before a KDF runs. Compare rejects a stored hash outside
-// these limits. Hash uses the same limits, so a hash this package creates
-// can be verified.
+// Ceilings applied before a KDF runs. Compare rejects a stored hash outside
+// these limits. Hash enforces the same ceilings, plus hashMinSaltLen and
+// hashMinKeyLen, so every hash this package creates can still be verified.
 const (
 	argon2idMaxTime   = 16
 	argon2idMaxMemory = 256 << 10 // KiB; 256 MiB
@@ -19,6 +19,11 @@ const (
 	minSaltLen = 8
 	maxSaltLen = 64
 	maxKeyLen  = 128
+
+	// New hashes use a 16-byte salt and tag. Compare still accepts the
+	// 8-byte salt stored by older PBKDF2 defaults.
+	hashMinSaltLen = 16
+	hashMinKeyLen  = 16
 )
 
 func checkArgon2id(time, memory uint32, threads uint8, keyLen uint32) error {
@@ -60,6 +65,13 @@ func checkKeyLen(n int) error {
 
 func checkSaltLen(n int) error {
 	if n < minSaltLen || n > maxSaltLen {
+		return ErrInvalidHash
+	}
+	return nil
+}
+
+func checkHashSizes(saltLen, keyLen int) error {
+	if saltLen < hashMinSaltLen || keyLen < hashMinKeyLen {
 		return ErrInvalidHash
 	}
 	return nil

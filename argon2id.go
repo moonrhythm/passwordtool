@@ -73,6 +73,9 @@ func (hc Argon2id) hash(password string) (string, error) {
 	if err := checkSaltLen(hc.s()); err != nil {
 		return "", err
 	}
+	if err := checkHashSizes(hc.s(), int(keyLen)); err != nil {
+		return "", err
+	}
 
 	salt, err := generateSalt(hc.s())
 	if err != nil {
