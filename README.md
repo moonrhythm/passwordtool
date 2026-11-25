@@ -195,20 +195,20 @@ A nil `H` stores `sha256`.
 
 ## Parameter limits
 
-`Hash` and `Compare` return `ErrInvalidHash` when a parameter is outside these bounds. `Compare` reads the values from the hash string. On `Hash`, a number that is `0` or below still selects that algorithm's default.
+`Compare` reads the parameters from the hash string, checks them before the KDF runs, and returns `ErrInvalidHash` when a value is outside these bounds.
 
-| Algorithm | Bounds |
+| Algorithm | What Compare accepts |
 | --- | --- |
 | Argon2id | time 1–16, memory 1–262144 KiB (256 MiB), at least 1 thread, key length 1–128 bytes, salt 8–64 bytes |
 | PBKDF2 | 1–5000000 iterations, key length 1–128 bytes, salt 8–64 bytes |
 | scrypt | `N` a power of two from 2 to 1048576, `r` 1–32, `p` 1–16, `128*N*r` at most 256 MiB, key length 1–128 bytes, salt 8–64 bytes |
 | bcrypt | cost 4–16 |
 
-The decoded key must be the same length as the key length stored in the hash. Salt and key bytes that are not unpadded standard base64 are `ErrInvalidHash`.
+The decoded key must be the same length as the key length stored in the hash. Salt and key bytes that are not unpadded standard base64 are `ErrInvalidHash`. Argon2 does not see a time, thread count, or key length of 0. bcrypt does not run its cost loop when the cost is above 16.
 
-`Compare` checks the bounds before the KDF runs. Argon2 does not see a time, thread count, or key length of 0. bcrypt does not run its cost loop when the cost is above 16.
+`Hash` uses those same ceilings. It also rejects an explicit salt or key length below 16 bytes, so the table's lower edge is what `Compare` still accepts, not what `Hash` will create. `0` selects the default, and every default salt and key is at least 16 bytes. An 8-byte salt still verifies because older PBKDF2 hashes used one.
 
-`Hash` also rejects an explicit salt or key length below 16 bytes. `0` still selects the default, and that default is at least 16 bytes. `Compare` still accepts an 8-byte salt, which is what older PBKDF2 hashes stored. A zero `PBKDF2.Iter` uses 220000 for SHA-512, 600000 for SHA-256, and 1400000 for SHA-1. An explicit `Iter` is stored as given.
+A zero `PBKDF2.Iter` uses 220000 for SHA-512, 600000 for SHA-256, and 1400000 for SHA-1. An explicit `Iter` is stored as given.
 
 ## License
 
