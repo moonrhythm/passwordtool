@@ -66,13 +66,23 @@ func (hc Scrypt) k() int {
 }
 
 func (hc Scrypt) hash(password string) (string, error) {
+	n, r, p, keyLen := hc.n(), hc.r(), hc.p(), hc.k()
+	if err := checkScryptParams(n, r, p); err != nil {
+		return "", err
+	}
+	if err := checkKeyLen(keyLen); err != nil {
+		return "", err
+	}
+	if err := checkSaltLen(hc.s()); err != nil {
+		return "", err
+	}
+
 	salt, err := generateSalt(hc.s())
 	if err != nil {
 		return "", err
 	}
 
-	n, r, p := hc.n(), hc.r(), hc.p()
-	dk, err := scrypt.Key([]byte(password), salt, n, r, p, hc.k())
+	dk, err := scrypt.Key([]byte(password), salt, n, r, p, keyLen)
 	if err != nil {
 		return "", err
 	}
@@ -84,9 +94,9 @@ func (hc Scrypt) hash(password string) (string, error) {
 }
 
 func (hc Scrypt) compare(hashed, password string) error {
-	n, r, p, salt, dk := hc.decode(hashed)
-	if len(dk) == 0 {
-		return ErrInvalidHash
+	n, r, p, salt, dk, err := hc.decode(hashed)
+	if err != nil {
+		return err
 	}
 
 	pk, err := scrypt.Key([]byte(password), salt, n, r, p, len(dk))
@@ -100,27 +110,36 @@ func (hc Scrypt) compare(hashed, password string) error {
 	return ErrMismatched
 }
 
-func (hc Scrypt) decode(hashed string) (n, r, p int, salt, dk []byte) {
+func (hc Scrypt) decode(hashed string) (n, r, p int, salt, dk []byte, err error) {
 	xs := strings.Split(hashed, "$")
 	if len(xs) != 5 {
+		err = ErrInvalidHash
 		return
 	}
 
-	var err error
 	n, err = strconv.Atoi(xs[0])
 	if err != nil {
+		err = ErrInvalidHash
 		return
 	}
 	r, err = strconv.Atoi(xs[1])
 	if err != nil {
+		err = ErrInvalidHash
 		return
 	}
 	p, err = strconv.Atoi(xs[2])
 	if err != nil {
+		err = ErrInvalidHash
 		return
 	}
-	salt = decodeBase64(xs[3])
-	dk = decodeBase64(xs[4])
+	if err = checkScryptParams(n, r, p); err != nil {
+		return
+	}
+	salt, err = decodeBase64(xs[3], minSaltLen, maxSaltLen)
+	if err != nil {
+		return
+	}
+	dk, err = decodeBase64(xs[4], 1, maxKeyLen)
 	return
 }
 

@@ -53,7 +53,7 @@ func main() {
 | `ErrMismatched` | The hash decoded, and the password does not match. |
 | `ErrInvalidHash` | The string is empty, names an unknown algorithm, or cannot be decoded. |
 
-bcrypt and scrypt can also return their own parameter errors unchanged.
+Parameters outside the [limits](#parameter-limits) are `ErrInvalidHash`. bcrypt can still return its own error when the bcrypt payload is malformed.
 
 ## Algorithms
 
@@ -128,7 +128,7 @@ if err := passwordtool.Compare(hashed, "superman"); err != nil {
 
 ## scrypt
 
-`N` must be a power of two greater than 1. `Hash` returns the error from `scrypt.Key` when the parameters are rejected.
+`N` must be a power of two from 2 to 1048576, and `128*N*r` must be at most 256 MiB. Parameters outside the [limits](#parameter-limits) return `ErrInvalidHash`.
 
 ```go
 hc := passwordtool.Scrypt{
@@ -168,7 +168,7 @@ if err == passwordtool.ErrMismatched {
 }
 ```
 
-Cost must be from 4 to 31. `0` selects `bcrypt.DefaultCost`. The cost used for a hash is the cost inside the bcrypt payload.
+Cost must be from 4 to 16. `0` selects `bcrypt.DefaultCost`. `Compare` reads the cost inside the bcrypt payload and rejects a cost above 16.
 
 ## bcrypt-hash
 
@@ -192,6 +192,21 @@ if err := passwordtool.Compare(hashed, "superman"); err != nil {
 ```
 
 A nil `H` stores `sha256`.
+
+## Parameter limits
+
+`Hash` and `Compare` return `ErrInvalidHash` when a parameter is outside these bounds. `Compare` reads the values from the hash string. On `Hash`, a number that is `0` or below still selects that algorithm's default.
+
+| Algorithm | Bounds |
+| --- | --- |
+| Argon2id | time 1–16, memory 1–262144 KiB (256 MiB), at least 1 thread, key length 1–128 bytes, salt 8–64 bytes |
+| PBKDF2 | 1–5000000 iterations, key length 1–128 bytes, salt 8–64 bytes |
+| scrypt | `N` a power of two from 2 to 1048576, `r` 1–32, `p` 1–16, `128*N*r` at most 256 MiB, key length 1–128 bytes, salt 8–64 bytes |
+| bcrypt | cost 4–16 |
+
+The decoded key must be the same length as the key length stored in the hash. Salt and key bytes that are not unpadded standard base64 are `ErrInvalidHash`.
+
+`Compare` checks the bounds before the KDF runs. Argon2 does not see a time, thread count, or key length of 0. bcrypt does not run its cost loop when the cost is above 16. The shortest salt these defaults have ever stored is 8 bytes, so an 8-byte salt still verifies.
 
 ## License
 

@@ -88,7 +88,13 @@ func encodeBase64(p []byte) string {
 	return base64.RawStdEncoding.EncodeToString(p)
 }
 
-func decodeBase64(s string) []byte {
-	p, _ := base64.RawStdEncoding.DecodeString(s)
-	return p
+func decodeBase64(s string, minLen, maxLen int) ([]byte, error) {
+	if minLen < 0 || maxLen < minLen || len(s) > base64.RawStdEncoding.EncodedLen(maxLen) {
+		return nil, ErrInvalidHash
+	}
+	p, err := base64.RawStdEncoding.DecodeString(s)
+	if err != nil || len(p) < minLen || len(p) > maxLen {
+		return nil, ErrInvalidHash
+	}
+	return p, nil
 }
