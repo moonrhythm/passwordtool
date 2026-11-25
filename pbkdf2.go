@@ -1,6 +1,7 @@
 package passwordtool
 
 import (
+	"cmp"
 	"crypto/subtle"
 	"fmt"
 	"strconv"
@@ -51,10 +52,7 @@ func (hc PBKDF2) s() int {
 }
 
 func (hc PBKDF2) h() Hasher {
-	if hc.H == nil {
-		return pbkdf2DefaultH
-	}
-	return hc.H
+	return cmp.Or(hc.H, pbkdf2DefaultH)
 }
 
 func (hc PBKDF2) hash(password string) (string, error) {

@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 )
 
@@ -52,12 +53,13 @@ func findHC(hashedPassword string) HashComparer {
 		return nil
 	}
 
-	for _, s := range strategies {
-		if strings.HasPrefix(hashedPassword, s.String()+"$") {
-			return s
-		}
+	i := slices.IndexFunc(strategies, func(s HashComparer) bool {
+		return strings.HasPrefix(hashedPassword, s.String()+"$")
+	})
+	if i < 0 {
+		return nil
 	}
-	return nil
+	return strategies[i]
 }
 
 func extract(hashedPassword string) (strategy string, hashed string) {

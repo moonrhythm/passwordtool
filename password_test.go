@@ -30,7 +30,6 @@ func TestStrategies(t *testing.T) {
 	t.Parallel()
 
 	for _, s := range strategyToTest {
-		s := s
 		t.Run(s.String(), func(t *testing.T) {
 			t.Parallel()
 
@@ -88,7 +87,6 @@ func TestCompare(t *testing.T) {
 	t.Parallel()
 
 	for _, s := range strategyToTest {
-		s := s
 		t.Run(s.String(), func(t *testing.T) {
 			t.Parallel()
 

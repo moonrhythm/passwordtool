@@ -1,6 +1,7 @@
 package passwordtool
 
 import (
+	"cmp"
 	"strings"
 )
 
@@ -14,10 +15,7 @@ type BcryptHash struct {
 }
 
 func (hc BcryptHash) h() Hasher {
-	if hc.H == nil {
-		return bcryptHashDefaultH
-	}
-	return hc.H
+	return cmp.Or(hc.H, bcryptHashDefaultH)
 }
 
 func (hc BcryptHash) String() string {

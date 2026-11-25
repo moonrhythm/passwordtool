@@ -1,6 +1,8 @@
 package passwordtool
 
 import (
+	"errors"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -33,10 +35,10 @@ func (hc Bcrypt) compare(hashedPassword string, password string) error {
 	if err == nil {
 		return nil
 	}
-	if err == bcrypt.ErrMismatchedHashAndPassword {
+	if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
 		return ErrMismatched
 	}
-	if err == bcrypt.ErrHashTooShort {
+	if errors.Is(err, bcrypt.ErrHashTooShort) {
 		return ErrInvalidHash
 	}
 	return err

@@ -6,6 +6,7 @@ import (
 	"crypto/sha512"
 	"fmt"
 	"hash"
+	"slices"
 )
 
 // Hasher type
@@ -16,12 +17,13 @@ type Hasher interface {
 }
 
 func findHasher(name string) Hasher {
-	for _, h := range hashers {
-		if h.String() == name {
-			return h
-		}
+	i := slices.IndexFunc(hashers, func(h Hasher) bool {
+		return h.String() == name
+	})
+	if i < 0 {
+		return nil
 	}
-	return nil
+	return hashers[i]
 }
 
 // Hasher strategies
